@@ -44,10 +44,8 @@ export default function MetricsDashboard({ metadata = {}, holders = {}, lifetime
   // Creator + royalty
   const primaryCreator = creators.find((c) => c.isCreator) || creators[0] || null
 
-  // Total supply
-  const supplyRaw = metadata.supply ?? null
-  const decimals = metadata.decimals ?? 9
-  const supplyWhole = supplyRaw != null ? supplyRaw / Math.pow(10, decimals) : null
+  // Total supply — heliusService already divides by 10^decimals before returning
+  const supplyWhole = metadata.supply != null ? metadata.supply : null
 
   // Creator — only providerUsername is a verified social handle
   const creatorHandle = primaryCreator?.providerUsername || null

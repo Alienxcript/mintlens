@@ -111,6 +111,16 @@ function buildReportPrompt(tokenData) {
     quote = null,
   } = tokenData
 
+  // Additional filter: remove any holder whose owner matches the Bags pool keys.
+  // This catches Meteora DBC pool vault authorities that aren't covered by the
+  // generic DEX_PROGRAM_IDS filter in heliusService (PDAs derived from pool key).
+  const poolOwners = new Set(
+    [pool?.dbcPoolKey, pool?.dbcConfigKey, pool?.dammV2PoolKey].filter(Boolean)
+  )
+  const filteredHolderList = (holders.holderList || []).filter(
+    h => !poolOwners.has(h.owner) && !poolOwners.has(h.address)
+  )
+
   return `Analyse this Bags.fm token and return a JSON report.
 
 TOKEN DATA:
@@ -123,9 +133,9 @@ Decimals: ${metadata.decimals ?? 9}
 HOLDERS:
 Total holders: ${holders.totalHolders != null ? holders.totalHolders : 'unknown (fetch failed — do not assume zero)'}
 Top-10 concentration: ${holders.top10Concentration != null ? `${holders.top10Concentration}%` : 'unknown'}
-Top holders (first 5):
-${(holders.holderList || []).slice(0, 5).map(h => `  #${h.rank} ${h.address?.slice(0, 8)}… ${h.percentage}%`).join('\n') || '  (data unavailable)'}
-IMPORTANT: If the top holder appears to be a DEX/AMM pool address (Meteora, Raydium, etc.), this is normal and healthy — it means liquidity is pooled, NOT a red flag. Do not flag DEX/AMM pool addresses as concentration risk.
+${holders.dexPooled ? `DEX/AMM pool liquidity: ${holders.dexPooled.percentage}% of supply is in DEX pool vaults (Meteora/Raydium/Orca — this is healthy, already excluded from holder stats above)` : ''}
+Top holders (first 5, DEX pool vaults already excluded):
+${filteredHolderList.slice(0, 5).map(h => `  #${h.rank} ${h.address?.slice(0, 8)}… ${h.percentage}%`).join('\n') || '  (data unavailable)'}
 
 FEES & REVENUE:
 Lifetime fees: ${JSON.stringify(lifetimeFees)}

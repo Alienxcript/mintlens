@@ -9,6 +9,17 @@ function rpcUrl() {
   return `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`
 }
 
+// Token accounts owned by these programs are DEX/AMM pool vaults — not real holders.
+// Filter them out before holder analysis so they don't inflate concentration stats.
+const DEX_PROGRAM_IDS = new Set([
+  '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8', // Raydium AMM V4
+  'CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK', // Raydium CLMM
+  'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc',  // Orca Whirlpool
+  'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EkAW7vA', // Meteora Dynamic AMM
+  'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo', // Meteora DLMM
+  'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN', // Meteora DBC (used by Bags.fm)
+])
+
 async function rpcCall(method, params) {
   const res = await axios.post(
     rpcUrl(),
@@ -32,11 +43,15 @@ export async function getTokenMetadata(tokenMint) {
     const token_info = result?.token_info || {}
     const price_info = token_info?.price_info || {}
 
+    const decimals = token_info.decimals ?? 9
     return {
       name: meta.name || token_info.symbol || null,
       symbol: meta.symbol || token_info.symbol || '',
-      decimals: token_info.decimals ?? 9,
-      supply: token_info.supply ?? 0,
+      decimals,
+      // Helius returns supply in raw base units — divide here so all consumers get human-readable
+      supply: token_info.supply != null
+        ? Math.round(Number(token_info.supply) / Math.pow(10, decimals))
+        : 0,
       price: price_info.price_per_token ?? null,
       marketCap: price_info.total_price ?? null,
       logoURI: content?.links?.image || content?.files?.[0]?.uri || null,
@@ -113,25 +128,40 @@ export async function getTokenHolders(tokenMint) {
       return { totalHolders: 0, top10Concentration: 0, holderList: [] }
     }
 
-    // Sort by amount descending
-    allAccounts.sort((a, b) => (b.amount || 0) - (a.amount || 0))
-
+    // Split into DEX pool vaults vs real holders.
+    // totalSupply uses ALL accounts so percentages represent share of full circulating supply.
     const totalSupply = allAccounts.reduce((sum, a) => sum + (Number(a.amount) || 0), 0)
-    const top10 = allAccounts.slice(0, 10)
+
+    const dexAccounts = allAccounts.filter(a => DEX_PROGRAM_IDS.has(a.owner))
+    const regularAccounts = allAccounts.filter(a => !DEX_PROGRAM_IDS.has(a.owner))
+
+    // Sort real holders by balance descending
+    regularAccounts.sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
+
+    const top10 = regularAccounts.slice(0, 10)
     const top10Sum = top10.reduce((sum, a) => sum + (Number(a.amount) || 0), 0)
     const top10Concentration = totalSupply > 0 ? (top10Sum / totalSupply) * 100 : 0
 
-    const holderList = allAccounts.slice(0, 50).map((a, i) => ({
+    // Include owner in holderList so callers can further filter by known pool keys
+    const holderList = regularAccounts.slice(0, 50).map((a, i) => ({
       rank: i + 1,
       address: a.address || a.owner,
+      owner: a.owner || null,
       amount: Number(a.amount),
       percentage: totalSupply > 0 ? ((Number(a.amount) / totalSupply) * 100).toFixed(2) : '0.00',
     }))
 
+    // Summary of what's pooled in DEX vaults (useful context for Claude)
+    const dexPooledAmount = dexAccounts.reduce((sum, a) => sum + (Number(a.amount) || 0), 0)
+    const dexPooled = dexPooledAmount > 0
+      ? { count: dexAccounts.length, percentage: ((dexPooledAmount / totalSupply) * 100).toFixed(1) }
+      : null
+
     return {
-      totalHolders: allAccounts.length,
+      totalHolders: regularAccounts.length,
       top10Concentration: Math.round(top10Concentration * 100) / 100,
       holderList,
+      dexPooled, // e.g. { count: 1, percentage: "89.3" } — passed to Claude as healthy context
     }
   } catch (err) {
     console.error(`[helius] getTokenHolders(${tokenMint}):`, err.message)
