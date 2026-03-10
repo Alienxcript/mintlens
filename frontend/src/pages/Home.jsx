@@ -43,22 +43,28 @@ export default function Home() {
   }
 
   const filtered = tokens.filter((t) => {
-    if (filter === 'High Score') return (t.score ?? 0) >= 70
+    if (filter === 'High Score') return t.score != null
     if (filter === 'New') {
-      const dateStr = t.createdAt || t.launchDate
+      const dateStr = t.createdAt || t.launchDate || t.metadata?.createdAt
       const ms = dateStr ? Date.now() - new Date(dateStr).getTime() : Infinity
       return ms < 24 * 60 * 60 * 1000
     }
-    if (filter === 'Flagged') return (t.score ?? 100) < 40
+    if (filter === 'Flagged') return t.score != null && t.score < 40
     return true
   })
+
+  if (filter !== 'All') {
+    console.log(`[feed filter: ${filter}] tokens=${tokens.length} filtered=${filtered.length}`,
+      tokens.slice(0, 3).map(t => ({ mint: t.mint?.slice(0,8), score: t.score, createdAt: t.createdAt }))
+    )
+  }
 
   const trending = [...tokens].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 6)
 
   return (
     <div className="min-h-screen bg-bg">
       {/* Sticky nav */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F] border-b border-border">
+      <header className="sticky top-0 z-50 border-b border-border" style={{ backgroundColor: '#0A0A0F' }}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src="/favicon.png" alt="Mintlens" className="w-8 h-8 shrink-0" />

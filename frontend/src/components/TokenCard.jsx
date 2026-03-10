@@ -45,7 +45,10 @@ export default function TokenCard({ token }) {
               {age && <div className="text-xs text-text-muted mt-0.5">{age}</div>}
             </div>
           </div>
-          {score != null && <ScoreBadge score={score} size="sm" />}
+          {score != null
+            ? <ScoreBadge score={score} size="sm" />
+            : <span className="text-xs font-mono shrink-0" style={{ color: '#6B6B8A' }}>Analyse →</span>
+          }
         </div>
 
         {/* Verdict */}

@@ -99,7 +99,9 @@ router.get('/feed', async (req, res, next) => {
           holders: holderData || {},
           // pool shape from getAllBagsPools has no volume — expose the keys we do have
           pool: { tokenMint: mint, dbcConfigKey: pool.dbcConfigKey, dbcPoolKey: pool.dbcPoolKey },
-          // Inject cached analysis score if available (enables High Score / Flagged filters)
+          // Expose createdAt at top level for feed filter (source: Helius DAS created_at)
+          createdAt: meta?.createdAt || null,
+          // Inject cached analysis score/verdict if available (enables High Score / Flagged filters)
           ...(cachedScore != null ? { score: cachedScore } : {}),
         }
       })

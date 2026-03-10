@@ -10,7 +10,7 @@
  *   plus 10 from the very start (oldest, most established) to maximise the
  *   chance of hitting tokens with real fee history.
  *
- *   Total API calls: 1 (pool list) + 60 (fees) + top20 * 3 (enrich) = ~121
+ *   Total API calls: 1 (pool list) + ~300 (fees) + top20 * 3 (enrich) = ~361
  *   Cache: 15 min TTL. The full enriched set is cached; limit is applied at
  *   response time so different limit values work correctly off the same cache.
  */
@@ -46,21 +46,26 @@ router.get('/', async (req, res, next) => {
       return res.json({ tokens: [], stats: { totalEcosystem: 0, totalFeesSol: 0, totalHolders: 0 }, cached: false })
     }
 
-    // 2. Build a spread sample: oldest 10 + 50 evenly distributed across the list
-    const sampleSize = 60
+    // 2. Build a sample biased toward established (older) tokens.
+    //    Oldest entries are at the START of the list — these have had the most
+    //    time to accumulate fees. New tokens (end) almost always have $0 fees.
+    //    Strategy: first 200 (oldest) + 100 spread across the rest = 300 total.
+    //    The Bags API rate limit is 1000 req/hr; 300 parallel fee calls is safe.
     const sampled = new Map()
 
-    // Always include the first 10 (oldest, most likely to have fees)
-    for (let i = 0; i < Math.min(10, totalEcosystem); i++) {
+    // Take the first 200 (oldest, most established)
+    const OLDEST_COUNT = Math.min(200, totalEcosystem)
+    for (let i = 0; i < OLDEST_COUNT; i++) {
       const mint = allPools[i].tokenMint || allPools[i].mint || allPools[i].id
       if (mint) sampled.set(mint, allPools[i])
     }
 
-    // Sample 50 more evenly across the rest of the list
-    const step = Math.floor(totalEcosystem / 50)
-    for (let i = step; i < totalEcosystem && sampled.size < sampleSize; i += step) {
-      const mint = allPools[i].tokenMint || allPools[i].mint || allPools[i].id
-      if (mint && !sampled.has(mint)) sampled.set(mint, allPools[i])
+    // Add 100 more evenly distributed across the remaining list
+    const remaining = allPools.slice(OLDEST_COUNT)
+    const step = Math.max(1, Math.floor(remaining.length / 100))
+    for (let i = 0; i < remaining.length && sampled.size < 300; i += step) {
+      const mint = remaining[i].tokenMint || remaining[i].mint || remaining[i].id
+      if (mint && !sampled.has(mint)) sampled.set(mint, remaining[i])
     }
 
     const candidates = [...sampled.entries()].map(([mint, pool]) => ({ mint, pool }))

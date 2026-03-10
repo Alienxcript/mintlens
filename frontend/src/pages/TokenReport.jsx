@@ -75,7 +75,7 @@ export default function TokenReport() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F] border-b border-border">
+      <header className="sticky top-0 z-50 border-b border-border" style={{ backgroundColor: '#0A0A0F' }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src="/favicon.png" alt="Mintlens" className="w-8 h-8 shrink-0" />
