@@ -25,6 +25,8 @@ MINTLENS is an AI-powered due-diligence platform for Bags.fm token launches on S
 - Creator lookup by username alone searches a 200-mint sample (~201 Bags API calls). A `hint` mint (a token you already know this creator owns) dramatically improves accuracy by resolving the creator's wallet first, then matching by wallet instead of username.
 - Helius `getTokenAccounts` returns up to 1000 accounts per page. Tokens with >1000 holders will have a partial holder list; this is noted in concentration calculations.
 - The **Wallet page** (connect your Solana wallet to view holdings) is **not available** — Privy integration is a stub only. Do not direct users to this feature.
+- `token_info.supply` from Helius DAS is in raw base units. The MINTLENS backend divides by `10^decimals` before returning `metadata.supply`, so the value is always human-readable (e.g. `1000000000`, not `1000000000000000000`).
+- DEX/AMM pool vault accounts are filtered from holder data before analysis. The `totalHolders`, `top10Concentration`, and `holderList` reflect real wallets only. A `dexPooled` field indicates what percentage is in pool vaults (healthy context).
 
 ---
 
