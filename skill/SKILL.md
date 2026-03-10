@@ -24,6 +24,7 @@ MINTLENS is an AI-powered due-diligence platform for Bags.fm token launches on S
 - Price, market cap, and 24h volume are **permanently unavailable** for Bags bonding-curve tokens. The Bags trade-quote endpoint returns 500 for these; DexScreener returns null pairs. Display `—` for these fields; never hallucinate values.
 - Creator lookup by username alone searches a 200-mint sample (~201 Bags API calls). A `hint` mint (a token you already know this creator owns) dramatically improves accuracy by resolving the creator's wallet first, then matching by wallet instead of username.
 - Helius `getTokenAccounts` returns up to 1000 accounts per page. Tokens with >1000 holders will have a partial holder list; this is noted in concentration calculations.
+- The **Wallet page** (connect your Solana wallet to view holdings) is **not available** — Privy integration is a stub only. Do not direct users to this feature.
 
 ---
 
@@ -258,6 +259,8 @@ VERDICT: {one sentence}
 - Creator has multiple prior abandoned Bags launches
 - `providerUsername` looks like a truncated wallet address — treat as anonymous
 
+> **Important — DEX/AMM pool addresses:** If the top holder address belongs to a Meteora, Raydium, or other DEX/AMM pool, this is **normal and healthy**. It means liquidity has been deposited into a pool. Do NOT flag this as concentration risk or a red flag. Only flag concentration when a regular wallet (not a known DEX program) holds a dominant share.
+
 ## Common Green Flags
 
 - Consistent fee generation with growing velocity
@@ -283,17 +286,19 @@ If the user asks to compare tokens, repeat Steps 1–4 for the second token and 
 
 ## Backend API Reference (MINTLENS REST API)
 
-All routes are served from `http://localhost:3001` in development. Production base URL: `MINTLENS_API_URL` env var.
+All routes are served from `http://localhost:3001` in development. Production base URL: `https://mintlens-production.up.railway.app` (or override with `MINTLENS_API_URL` env var). Live frontend: `https://mintlens-alpha.vercel.app`
 
 Body size limit: `2mb` (required because tokenData payloads with holder accounts can be large).
 
 ### GET /api/tokens/feed
-Returns the 50 newest Bags.fm pools enriched with metadata, fees, and holder count.
+Returns the 20 newest Bags.fm pools enriched with metadata, fees, holder count, and any cached Claude score.
 ```
 Query: limit=20 (max 50)
 Response: { tokens: [...], count: N }
 ```
-Token shape: `{ mint, metadata: { name, symbol, logoURI }, lifetimeFees: { totalFees }, holders: { totalHolders }, pool: { tokenMint, dbcConfigKey, dbcPoolKey } }`
+Token shape: `{ mint, metadata: { name, symbol, logoURI }, lifetimeFees: { totalFees }, holders: { totalHolders }, pool: { tokenMint, dbcConfigKey, dbcPoolKey }, createdAt: "ISO8601|null", score: number|undefined }`
+
+`score` is only present if this token has a cached Claude analysis. Feed filter tabs: **All** (default) and **High Score** (tokens where `score != null`).
 
 Returns `{ tokens: [], placeholder: true, message: "…" }` when API keys are not configured.
 
@@ -334,7 +339,7 @@ Response: { reply: "…", timestamp: "ISO8601" }
 ```
 
 ### GET /api/leaderboard?limit=20
-Top Bags.fm tokens by lifetime fees. Samples 60 mints spread across all ~168k pools to find established tokens.
+Top Bags.fm tokens by lifetime fees. Samples ~300 mints biased toward the oldest pools (first 200 oldest + 100 spread) to find established tokens with accumulated fees. New pools at the tail of the list have $0 fees and are skipped.
 ```
 Response: {
   tokens: [{ rank, mint, name, symbol, logoURI, lifetimeFeesSol, holders, creator: { handle, provider, pfp } | null, score }],
