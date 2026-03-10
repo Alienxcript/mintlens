@@ -45,8 +45,9 @@ export default function Home() {
   const filtered = tokens.filter((t) => {
     if (filter === 'High Score') return (t.score ?? 0) >= 70
     if (filter === 'New') {
-      const ms = t.createdAt ? Date.now() - new Date(t.createdAt).getTime() : Infinity
-      return ms < 3 * 60 * 60 * 1000
+      const dateStr = t.createdAt || t.launchDate
+      const ms = dateStr ? Date.now() - new Date(dateStr).getTime() : Infinity
+      return ms < 24 * 60 * 60 * 1000
     }
     if (filter === 'Flagged') return (t.score ?? 100) < 40
     return true
@@ -57,7 +58,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Sticky nav */}
-      <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-10 bg-[#0A0A0F] border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src="/favicon.png" alt="Mintlens" className="w-8 h-8 shrink-0" />
@@ -69,12 +70,6 @@ export default function Home() {
             className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all shrink-0"
           >
             Leaderboard
-          </Link>
-          <Link
-            to="/wallet"
-            className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all shrink-0"
-          >
-            Wallet
           </Link>
         </div>
       </header>

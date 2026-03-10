@@ -8,6 +8,7 @@
 import { Router } from 'express'
 import * as bags from '../services/bagsService.js'
 import * as helius from '../services/heliusService.js'
+import { getCachedScore } from './analysis.js'
 
 const router = Router()
 
@@ -89,6 +90,7 @@ router.get('/feed', async (req, res, next) => {
           helius.getHolderCountQuick(mint),
         ]).then((r) => r.map((x) => (x.status === 'fulfilled' ? x.value : null)))
 
+        const cachedScore = getCachedScore(mint)
         return {
           ...pool,
           mint,
@@ -97,6 +99,8 @@ router.get('/feed', async (req, res, next) => {
           holders: holderData || {},
           // pool shape from getAllBagsPools has no volume — expose the keys we do have
           pool: { tokenMint: mint, dbcConfigKey: pool.dbcConfigKey, dbcPoolKey: pool.dbcPoolKey },
+          // Inject cached analysis score if available (enables High Score / Flagged filters)
+          ...(cachedScore != null ? { score: cachedScore } : {}),
         }
       })
     )

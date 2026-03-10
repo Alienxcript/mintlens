@@ -75,7 +75,7 @@ export default function TokenReport() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-10 bg-[#0A0A0F] border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src="/favicon.png" alt="Mintlens" className="w-8 h-8 shrink-0" />
@@ -300,7 +300,7 @@ function shareOnX({ mint, metadata, report, lifetimeFees }) {
     `${name}${symbol} — Mintlens Score: ${score != null ? `${score}/100` : '?'}`,
     fees ? `Fees: ${fees}` : null,
     verdict ? `${emoji} ${verdict}` : null,
-    `mintlens.xyz/token/${mint}`,
+    `https://mintlens-alpha.vercel.app/token/${mint}`,
     `@Mintlens_xyz #Bags #Solana`,
   ].filter(Boolean)
 

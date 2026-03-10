@@ -125,6 +125,7 @@ Total holders: ${holders.totalHolders != null ? holders.totalHolders : 'unknown 
 Top-10 concentration: ${holders.top10Concentration != null ? `${holders.top10Concentration}%` : 'unknown'}
 Top holders (first 5):
 ${(holders.holderList || []).slice(0, 5).map(h => `  #${h.rank} ${h.address?.slice(0, 8)}… ${h.percentage}%`).join('\n') || '  (data unavailable)'}
+IMPORTANT: If the top holder appears to be a DEX/AMM pool address (Meteora, Raydium, etc.), this is normal and healthy — it means liquidity is pooled, NOT a red flag. Do not flag DEX/AMM pool addresses as concentration risk.
 
 FEES & REVENUE:
 Lifetime fees: ${JSON.stringify(lifetimeFees)}

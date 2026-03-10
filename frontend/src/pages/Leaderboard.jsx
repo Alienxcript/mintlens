@@ -24,7 +24,7 @@ export default function Leaderboard() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Nav */}
-      <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-10 bg-[#0A0A0F] border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <img src="/favicon.png" alt="Mintlens" className="w-8 h-8 shrink-0" />
@@ -37,12 +37,6 @@ export default function Leaderboard() {
           >
             Leaderboard
           </span>
-          <Link
-            to="/wallet"
-            className="text-sm px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all"
-          >
-            Wallet
-          </Link>
         </div>
       </header>
 
@@ -86,13 +80,6 @@ export default function Leaderboard() {
               style={{ backgroundColor: '#84CC16' }}
             >
               All Time
-            </button>
-            <button
-              disabled
-              title="Coming soon"
-              className="px-4 py-1.5 rounded-lg text-sm font-medium text-text-muted opacity-40 cursor-not-allowed"
-            >
-              1D
             </button>
           </div>
           {data?.cached && (
