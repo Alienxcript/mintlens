@@ -44,3 +44,4 @@ playwright-report/
 *.jpg
 !frontend/src/assets/**/*.png
 !frontend/src/assets/**/*.jpg
+!frontend/public/*.png
