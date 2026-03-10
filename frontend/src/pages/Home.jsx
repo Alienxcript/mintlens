@@ -4,7 +4,7 @@ import { TrendingUp, AlertTriangle, Bell } from 'lucide-react'
 import { tokenApi, alertsApi } from '../lib/api.js'
 import TokenCard from '../components/TokenCard.jsx'
 
-const FILTERS = ['All', 'High Score', 'New', 'Flagged']
+const FILTERS = ['All', 'High Score']
 const REFRESH_INTERVAL = 30_000
 
 export default function Home() {
@@ -44,20 +44,8 @@ export default function Home() {
 
   const filtered = tokens.filter((t) => {
     if (filter === 'High Score') return t.score != null
-    if (filter === 'New') {
-      const dateStr = t.createdAt || t.launchDate || t.metadata?.createdAt
-      const ms = dateStr ? Date.now() - new Date(dateStr).getTime() : Infinity
-      return ms < 24 * 60 * 60 * 1000
-    }
-    if (filter === 'Flagged') return t.score != null && t.score < 40
     return true
   })
-
-  if (filter !== 'All') {
-    console.log(`[feed filter: ${filter}] tokens=${tokens.length} filtered=${filtered.length}`,
-      tokens.slice(0, 3).map(t => ({ mint: t.mint?.slice(0,8), score: t.score, createdAt: t.createdAt }))
-    )
-  }
 
   const trending = [...tokens].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 6)
 
@@ -201,7 +189,6 @@ export default function Home() {
                   }`}
                   style={filter === f ? { backgroundColor: '#84CC16' } : {}}
                 >
-                  {f === 'Flagged' && <AlertTriangle size={11} />}
                   {f}
                 </button>
               ))}
