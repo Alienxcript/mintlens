@@ -1,0 +1,20 @@
+{
+  "name": "mintlens-backend",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "axios": "^1.7.7",
+    "canvas": "^3.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^8.3.1",
+    "nodemailer": "^6.9.15",
+    "web-push": "^3.6.7"
+  }
+}

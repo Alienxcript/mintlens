@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg text-text-primary font-sans;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #12121A;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1E1E2E;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #84CC16;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'DM Mono', monospace;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #84CC16, #00D4AA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-xl;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-opacity-90 text-[#0A0A0F] font-medium px-4 py-2 rounded-lg transition-all;
+  }
+
+  .btn-ghost {
+    @apply border border-border hover:border-primary text-text-muted hover:text-text-primary px-4 py-2 rounded-lg transition-all;
+  }
+
+  .skeleton {
+    @apply bg-surface animate-pulse rounded;
+  }
+}
