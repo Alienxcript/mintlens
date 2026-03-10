@@ -38,6 +38,10 @@ Thumbs.db
 test-results/
 playwright-report/
 
+# Internal / meta files
+PROGRESS.md
+CLAUDE.md
+
 # Misc
 *.png
 *.jpeg
