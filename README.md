@@ -50,7 +50,7 @@ The home page shows the 20 newest Bags.fm pools, refreshed every 30 seconds.
 Shows the top Bags.fm tokens by lifetime fees earned. The backend samples ~300 pools biased toward older, established tokens (which have had time to accumulate fees) and enriches the top earners with metadata and creator info. Cache refreshes every 15 minutes.
 
 ### Export Skill
-On any Token Report page, click **Export Skill** to download a `SKILL.md` file. Drop it into Claude Code and Claude can analyse Bags tokens directly from your terminal without opening the web app.
+Click **Export Skill** in the navigation bar (available on every page at [mintlens-alpha.vercel.app](https://mintlens-alpha.vercel.app)) to download a `SKILL.md` file. Drop it into Claude Code and Claude can analyse Bags tokens directly from your terminal without opening the web app.
 
 ---
 
@@ -128,12 +128,13 @@ See [mcp/README.md](mcp/README.md) for full setup instructions.
 
 ## SKILL.md — Claude Code Skill
 
-Download a `SKILL.md` from any Token Report page (click "Export Skill"), or use the static version at `skill/SKILL.md`.
+The `SKILL.md` is available exclusively via the **Export Skill** button on [mintlens-alpha.vercel.app](https://mintlens-alpha.vercel.app) — it is dynamically generated with the latest analysis logic and is not distributed as a static file.
 
 Install in Claude Code:
 ```bash
-# Add to your project's .claude/skills/ directory
-cp skill/SKILL.md /your/project/.claude/skills/mintlens-token-analysis.md
+# 1. Click "Export Skill" on mintlens-alpha.vercel.app to download SKILL.md
+# 2. Add to your project's .claude/skills/ directory
+cp ~/Downloads/SKILL.md /your/project/.claude/skills/mintlens-token-analysis.md
 ```
 
 Once installed, just ask Claude: *"Analyse this Bags token: [mint address]"*

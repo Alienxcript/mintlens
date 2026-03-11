@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock } from 'lucide-react'
+import { Clock, Download, Share2 } from 'lucide-react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useTokenData } from '../hooks/useTokenData.js'
 import { useAnalysis } from '../hooks/useAnalysis.js'
@@ -97,18 +97,22 @@ export default function TokenReport() {
 
           <div className="flex items-center gap-2 shrink-0">
             <WatchlistButton mint={mint} name={metadata.name} />
-            <button onClick={() => setShowShareCard((s) => !s)} className="btn-ghost text-sm hidden lg:block">
-              Share
-            </button>
-            <button onClick={() => shareOnX({ mint, metadata, report, lifetimeFees })} className="btn-ghost text-sm hidden sm:block">
-              Share on X
+            <button
+              onClick={() => shareOnX({ mint, metadata, report, lifetimeFees })}
+              className="btn-ghost text-sm flex items-center gap-1.5"
+              title="Share on X"
+            >
+              <Share2 size={14} />
+              <span className="hidden sm:inline">Share on X</span>
             </button>
             <button
               onClick={downloadSkill}
               disabled={exportingSkill}
-              className="btn-ghost text-sm disabled:opacity-50 hidden lg:block"
+              className="btn-ghost text-sm flex items-center gap-1.5 disabled:opacity-50"
+              title="Export Skill"
             >
-              {exportingSkill ? '…' : 'Export Skill'}
+              {exportingSkill ? <span className="text-xs">…</span> : <Download size={14} />}
+              <span className="hidden sm:inline">{exportingSkill ? 'Exporting…' : 'Export Skill'}</span>
             </button>
           </div>
         </div>

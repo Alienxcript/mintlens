@@ -41,6 +41,7 @@ playwright-report/
 # Internal / meta files
 PROGRESS.md
 CLAUDE.md
+skill/SKILL.md
 
 # Misc
 *.png

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { TrendingUp, AlertTriangle, Bell } from 'lucide-react'
-import { tokenApi, alertsApi } from '../lib/api.js'
+import { TrendingUp, AlertTriangle, Bell, Download } from 'lucide-react'
+import { tokenApi, alertsApi, skillApi } from '../lib/api.js'
 import TokenCard from '../components/TokenCard.jsx'
 
 const FILTERS = ['All', 'High Score']
@@ -14,7 +14,28 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState('')
   const [showAlertModal, setShowAlertModal] = useState(false)
   const [noKeys, setNoKeys] = useState(false)
+  const [exportingSkill, setExportingSkill] = useState(false)
   const navigate = useNavigate()
+
+  async function downloadSkill() {
+    setExportingSkill(true)
+    try {
+      const res = await skillApi.generate({ verbosity: 'detailed', focus: 'balanced' })
+      const blob = typeof res === 'string'
+        ? new Blob([res], { type: 'text/markdown' })
+        : new Blob([JSON.stringify(res)], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'SKILL.md'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert(`Could not generate SKILL.md: ${err.message}`)
+    } finally {
+      setExportingSkill(false)
+    }
+  }
 
   const fetchFeed = useCallback(async () => {
     try {
@@ -59,12 +80,23 @@ export default function Home() {
             <span className="text-xl font-mono font-bold text-gradient hidden sm:block">MINTLENS</span>
           </Link>
           <div className="flex-1" />
-          <Link
-            to="/leaderboard"
-            className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all shrink-0"
-          >
-            Leaderboard
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/leaderboard"
+              className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all"
+            >
+              Leaderboard
+            </Link>
+            <button
+              onClick={downloadSkill}
+              disabled={exportingSkill}
+              className="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary border border-border hover:border-primary transition-all flex items-center gap-1.5 disabled:opacity-50"
+              title="Export Skill"
+            >
+              {exportingSkill ? <span>…</span> : <Download size={13} />}
+              <span className="hidden sm:inline">{exportingSkill ? 'Exporting…' : 'Export Skill'}</span>
+            </button>
+          </div>
         </div>
       </header>
 

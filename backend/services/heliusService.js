@@ -31,6 +31,31 @@ async function rpcCall(method, params) {
 }
 
 /**
+ * Fetch the oldest on-chain timestamp for a mint address by paginating
+ * getSignaturesForAddress until we reach the beginning of history (cap: 10 pages).
+ * Returns an ISO string, or null on failure.
+ */
+async function fetchOldestMintTimestamp(tokenMint) {
+  try {
+    const PAGE = 1000
+    let before = undefined
+    let oldestTime = null
+    for (let i = 0; i < 10; i++) {
+      const params = [tokenMint, { limit: PAGE, commitment: 'confirmed', ...(before ? { before } : {}) }]
+      const sigs = await rpcCall('getSignaturesForAddress', params)
+      if (!Array.isArray(sigs) || sigs.length === 0) break
+      const last = sigs[sigs.length - 1]
+      if (last?.blockTime) oldestTime = last.blockTime
+      if (sigs.length < PAGE) break // reached the beginning
+      before = last.signature
+    }
+    return oldestTime ? new Date(oldestTime * 1000).toISOString() : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Token metadata via DAS getAsset.
  * Returns: { name, symbol, price, marketCap, supply, decimals, logoURI }
  */
@@ -44,6 +69,11 @@ export async function getTokenMetadata(tokenMint) {
     const price_info = token_info?.price_info || {}
 
     const decimals = token_info.decimals ?? 9
+
+    // result?.created_at from Helius DAS is unreliable — fall back to the oldest
+    // on-chain signature timestamp which accurately reflects the token mint date.
+    const createdAt = await fetchOldestMintTimestamp(tokenMint)
+
     return {
       name: meta.name || token_info.symbol || null,
       symbol: meta.symbol || token_info.symbol || '',
@@ -56,7 +86,7 @@ export async function getTokenMetadata(tokenMint) {
       marketCap: price_info.total_price ?? null,
       logoURI: content?.links?.image || content?.files?.[0]?.uri || null,
       description: meta.description || null,
-      createdAt: result?.created_at ?? null,
+      createdAt,
       raw: result,
     }
   } catch (err) {
