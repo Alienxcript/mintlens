@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import Home from './pages/Home.jsx'
 import TokenReport from './pages/TokenReport.jsx'
 import CreatorProfile from './pages/CreatorProfile.jsx'
@@ -7,6 +8,8 @@ import Leaderboard from './pages/Leaderboard.jsx'
 
 export default function App() {
   return (
+    <>
+    <Analytics />
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/token/:mint" element={<TokenReport />} />
@@ -14,5 +17,6 @@ export default function App() {
       <Route path="/wallet" element={<Wallet />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
     </Routes>
+    </>
   )
 }
