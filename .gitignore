@@ -42,6 +42,7 @@ playwright-report/
 PROGRESS.md
 CLAUDE.md
 skill/SKILL.md
+.claude/
 
 # Misc
 *.png
