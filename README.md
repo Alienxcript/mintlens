@@ -139,6 +139,8 @@ cp ~/Downloads/SKILL.md /your/project/.claude/skills/mintlens-token-analysis.md
 
 Once installed, just ask Claude: *"Analyse this Bags token: [mint address]"*
 
+> **Note:** For best results, use the SKILL.md inside a project that has `BAGS_API_KEY` and `HELIUS_API_KEY` configured as environment variables. Without API keys, Claude will fall back to public data sources (DexScreener, RugCheck) and fee traction data will be unavailable.
+
 ---
 
 ## API Reference
